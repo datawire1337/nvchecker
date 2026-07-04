@@ -8,9 +8,9 @@ async def test_rpmrepo_fedora(get_version):
     ver = await get_version("knot_fedora-39", {
         "source": "rpmrepo",
         "pkg": "libbtrfs",
-        "repo": "https://ftp.sh.cvut.cz/fedora/linux/updates/42/Everything/x86_64/",
+        "repo": "https://ftp.sh.cvut.cz/fedora/linux/updates/44/Everything/x86_64/",
     })
-    assert ver.startswith("6.19")
+    assert ver.startswith("7.0")
 
 async def test_rpmrepo_alma(get_version):
     assert await get_version("test", {
