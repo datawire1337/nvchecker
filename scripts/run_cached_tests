@@ -2,10 +2,17 @@
 
 mitmdump=${mitmdump:-mitmdump}
 
+# geo.mirror.pkgbuild.com is hit directly by pacman (tests/test_alpmfiles.py)
+# rather than through nvchecker's own HTTP client, so it isn't part of what
+# gets recorded/replayed here. Exempting it from interception lets pacman
+# talk to it directly instead of going through mitmproxy's own CA, which
+# pacman's system CA store doesn't trust.
+ignore_hosts='127\.0\.0\.1|geo\.mirror\.pkgbuild\.com'
+
 if [[ -f ~/.mitmproxy/nvdump ]]; then
-  $mitmdump -S ~/.mitmproxy/nvdump -p 7890 --ignore-hosts '127\.0\.0\.1' --server-replay-reuse --server-replay-extra=forward -w newdump >mitmdump_output &
+  $mitmdump -S ~/.mitmproxy/nvdump -p 7890 --ignore-hosts "$ignore_hosts" --server-replay-reuse --server-replay-extra=forward -w newdump >mitmdump_output &
 else
-  $mitmdump -w ~/.mitmproxy/nvdump -p 7890 --ignore-hosts '127\.0\.0\.1' >mitmdump_output &
+  $mitmdump -w ~/.mitmproxy/nvdump -p 7890 --ignore-hosts "$ignore_hosts" >mitmdump_output &
 fi
 
 mitm_pid=$!
