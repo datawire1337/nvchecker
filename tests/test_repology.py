@@ -3,7 +3,8 @@
 
 import pytest
 pytestmark = [pytest.mark.asyncio,
-              pytest.mark.needs_net]
+              pytest.mark.needs_net,
+              pytest.mark.skip('403 Forbidden')]
 
 async def test_repology(get_version):
   assert await get_version("ssed", {
