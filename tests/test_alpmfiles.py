@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Pekka Ristola <pekkarr [at] protonmail [dot] com>, et al.
 
 import pathlib
+import re
 import shutil
 import subprocess
 import tempfile
@@ -17,6 +18,20 @@ pytestmark = [
 global temp_dir, db_path
 
 
+def get_pacman_version():
+  try:
+    # pacman --version typically outputs: pacman v7.1.0 - libalpm v15.0.0
+    output = subprocess.check_output(['pacman', '--version'], text=True)
+    match = re.search(r'pacman\s+v([\d.]+)', output, re.IGNORECASE)
+    if match:
+      version_str = match.group(1)
+      # Convert to a tuple of integers for reliable comparison (e.g., "7.1.2" -> (7, 1, 2))
+      return tuple(map(int, version_str.split('.')))
+  except Exception:
+    pass
+  return (0, 0)
+
+
 def setup_module(module):
   global temp_dir, db_path
 
@@ -26,7 +41,12 @@ def setup_module(module):
 
   db_path.mkdir(exist_ok=True)
 
-  cmd = ['fakeroot', 'pacman', '-Fy', '--dbpath', db_path, '--disable-sandbox-filesystem']
+  cmd = ['fakeroot', 'pacman', '-Fy', '--dbpath', db_path]
+
+  # Append --disable-sandbox-filesystem if pacman version is >= 7.1
+  if get_pacman_version() >= (7, 1):
+    cmd.append('--disable-sandbox-filesystem')
+
   subprocess.check_call(cmd)
 
 

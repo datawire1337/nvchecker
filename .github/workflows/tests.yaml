@@ -35,6 +35,24 @@ jobs:
         sudo apt update
         sudo apt install -y libgit2-dev
 
+    - name: Install pacman/libalpm deps
+      run: |
+        sudo apt install -y pacman-package-manager libarchive-tools libalpm-dev libssl-dev libarchive-dev libcurl4-openssl-dev libseccomp-dev libgpgme-dev
+    - name: Configure Arch repos
+      run: |
+        sudo pacman-key --init
+        sudo pacman-key --populate archlinux 2>/dev/null || true
+        cat <<'EOF' | sudo tee -a /etc/pacman.conf
+        [core]
+        Server = https://geo.mirror.pkgbuild.com/core/os/x86_64
+        [extra]
+        Server = https://geo.mirror.pkgbuild.com/extra/os/x86_64
+        EOF
+        sudo pacman -Sy
+    - name: Install pyalpm
+      run: |
+        pip install -U pyalpm
+
     - name: Install pycurl deps
       if: ${{ contains(matrix.deps, 'pycurl') }}
       run: |
@@ -151,6 +169,24 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y libgit2-dev
+
+    - name: Install pacman/libalpm deps
+      run: |
+        sudo apt install -y pacman-package-manager libarchive-tools libalpm-dev libssl-dev libarchive-dev libcurl4-openssl-dev libseccomp-dev libgpgme-dev
+    - name: Configure Arch repos
+      run: |
+        sudo pacman-key --init
+        sudo pacman-key --populate archlinux 2>/dev/null || true
+        cat <<'EOF' | sudo tee -a /etc/pacman.conf
+        [core]
+        Server = https://geo.mirror.pkgbuild.com/core/os/x86_64
+        [extra]
+        Server = https://geo.mirror.pkgbuild.com/extra/os/x86_64
+        EOF
+        sudo pacman -Sy
+    - name: Install pyalpm
+      run: |
+        pip install -U pyalpm
 
     - name: Install pycurl deps
       if: ${{ contains(matrix.deps, 'pycurl') }}
