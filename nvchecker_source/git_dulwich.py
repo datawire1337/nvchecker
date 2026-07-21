@@ -45,7 +45,7 @@ def _list_remote_refs(
         username=username,
         password=password,
     )
-    result = client.get_refs(path)  # type: ignore[arg-type]
+    result = client.get_refs(path)
     refs = cast(Dict[bytes, bytes], result.refs)
 
     if ref is None:
