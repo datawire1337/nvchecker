@@ -21,7 +21,7 @@ session = Proxy()
 
 def setup(
   which: Optional[str] = None,
-  concurreny: int = 20,
+  concurrency: int = 20,
   timeout: int = 20,
   resolver: Optional[str] = None,
 ) -> None:
@@ -32,7 +32,7 @@ def setup(
     '%s_httpclient' % which, globals(), locals(), level=1)
 
   session.set_obj(m.session)
-  session.setup(concurreny, timeout, resolver)
+  session.setup(concurrency, timeout, resolver)
 
 def find_best_httplib() -> str:
   try:

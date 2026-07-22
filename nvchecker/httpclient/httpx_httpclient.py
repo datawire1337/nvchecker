@@ -12,7 +12,7 @@ __all__ = ['session']
 class HttpxSession(BaseSession):
   def setup(
     self,
-    concurreny: int = 20,
+    concurrency: int = 20,
     timeout: int = 20,
     resolver: Optional[str] = None,
   ) -> None:

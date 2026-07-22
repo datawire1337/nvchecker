@@ -18,11 +18,11 @@ class AiohttpSession(BaseSession):
 
   def setup(
     self,
-    concurreny: int = 20,
+    concurrency: int = 20,
     timeout: int = 20,
     resolver: Optional[str] = None,
   ) -> None:
-    self._concurreny = concurreny
+    self._concurrency = concurrency
     self._timeout = timeout
 
   async def request_impl(
@@ -39,7 +39,7 @@ class AiohttpSession(BaseSession):
     if self.session is None:
       # need to create in async context
       self.session = aiohttp.ClientSession(
-        connector = aiohttp.TCPConnector(limit=self._concurreny),
+        connector = aiohttp.TCPConnector(limit=self._concurrency),
         timeout = aiohttp.ClientTimeout(total=self._timeout),
         trust_env = True,
       )
