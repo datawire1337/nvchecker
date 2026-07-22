@@ -189,6 +189,6 @@ async def test_git_pygit2_http_auth_requires_both_options(conf):
         await git_pygit2.get_version(
             "test",
             conf,
-            cache=None,  # type: ignore[arg-type]
-            keymanager=None,  # type: ignore[arg-type]
+            cache=None,
+            keymanager=None,
         )
