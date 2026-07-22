@@ -953,7 +953,7 @@ branch
 When this source returns tags (``use_commit`` is not true) it supports :ref:`list options`.
 
 Check Git repository without git CLI using pygit2
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ::
 
   source = "git_pygit2"
@@ -965,12 +965,26 @@ packages can be installed but external binaries cannot be executed.
 git
   URL of the Git repository.
 
+username
+  Username to use for HTTP authentication.
+
+password_key
+  Key name used to retrieve the password or access token from the configured
+  keyfile.
+
 use_commit
   Return a commit hash instead of tags.
 
 branch
   When ``use_commit`` is true, return the commit on the specified branch instead
   of the default one.
+
+Example for a private GitHub repository::
+
+  source = "git_pygit2"
+  git = "https://github.com/example/private-repo.git"
+  username = "x-access-token"
+  password_key = "github"
 
 When this source returns tags (``use_commit`` is not true) it supports
 :ref:`list options`.
