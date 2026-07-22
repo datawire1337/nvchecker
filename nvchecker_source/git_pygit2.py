@@ -92,6 +92,8 @@ async def get_version(
 
     username = conf.get("username")
     password_key = conf.get("password_key")
+    if (username is None) != (password_key is None):
+        raise GetVersionError("username and password_key must be specified together")
     password = keymanager.get_key(password_key) if password_key is not None else None
 
     use_commit = conf.get("use_commit", False)

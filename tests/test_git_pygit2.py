@@ -3,6 +3,8 @@
 
 import pytest
 
+from nvchecker.api import GetVersionError
+
 # Skip all tests in this file if pygit2 is not installed
 pygit2_available = True
 try:
@@ -162,3 +164,31 @@ async def test_git_pygit2_http_auth(monkeypatch):
     )
 
     assert result[0].version == "v1.0"
+
+
+@pytest.mark.parametrize(
+    "conf",
+    [
+        {
+            "git": "https://example.com/repository.git",
+            "username": "git-user",
+        },
+        {
+            "git": "https://example.com/repository.git",
+            "password_key": "git-password",
+        },
+    ],
+)
+async def test_git_pygit2_http_auth_requires_both_options(conf):
+    from nvchecker_source import git_pygit2
+
+    with pytest.raises(
+        GetVersionError,
+        match="username and password_key must be specified together",
+    ):
+        await git_pygit2.get_version(
+            "test",
+            conf,
+            cache=None,  # type: ignore[arg-type]
+            keymanager=None,  # type: ignore[arg-type]
+        )
