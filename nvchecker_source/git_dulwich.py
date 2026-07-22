@@ -1,25 +1,52 @@
 # MIT licensed
-# Copyright (c) 2026 Lorenzo Pirritano <lorepirri@gmail.com>
+# Copyright (c) 2026 Lorenzo Pirritano <6698585+lorepirri@users.noreply.github.com>
 
 import asyncio
+from collections.abc import Hashable
+from typing import Dict, List, Optional, Tuple, Union, cast
 
 import dulwich.client  # type: ignore[import-not-found]
 from dulwich.config import StackedConfig  # type: ignore[import-not-found]
 
-from nvchecker.api import RichResult, GetVersionError
+from nvchecker.api import (
+    AsyncCache,
+    Entry,
+    GetVersionError,
+    KeyManager,
+    RichResult,
+    VersionResult,
+)
 
 
-async def _list_remote_refs_async(key):
-    return await asyncio.to_thread(_list_remote_refs, key)
+RemoteRefsKey = Tuple[
+    str,
+    Optional[str],
+    Optional[str],
+    Optional[str],
+]
 
 
-def _list_remote_refs(key):
-    git, ref = key
+async def _list_remote_refs_async(
+    key: Hashable,
+) -> Dict[bytes, bytes]:
+    typed_key = cast(RemoteRefsKey, key)
+    return await asyncio.to_thread(_list_remote_refs, typed_key)
+
+
+def _list_remote_refs(
+    key: RemoteRefsKey,
+) -> Dict[bytes, bytes]:
+    git, ref, username, password = key
 
     config = StackedConfig.default()
-    client, path = dulwich.client.get_transport_and_path(git, config=config)
+    client, path = dulwich.client.get_transport_and_path(
+        git,
+        config=config,
+        username=username,
+        password=password,
+    )
     result = client.get_refs(path)
-    refs = result.refs
+    refs = cast(Dict[bytes, bytes], result.refs)
 
     if ref is None:
         return refs
@@ -27,8 +54,18 @@ def _list_remote_refs(key):
     return {k: v for k, v in refs.items() if k.decode() == ref}
 
 
-async def get_version(name, conf, *, cache, keymanager=None):
+async def get_version(
+    name: str,
+    conf: Entry,
+    *,
+    cache: AsyncCache,
+    keymanager: KeyManager,
+) -> VersionResult:
     git = conf["git"]
+
+    username = conf.get("username")
+    password_key = conf.get("password_key")
+    password = keymanager.get_key(password_key) if password_key is not None else None
 
     use_commit = conf.get("use_commit", False)
     if use_commit:
@@ -40,9 +77,15 @@ async def get_version(name, conf, *, cache, keymanager=None):
             ref = "refs/heads/" + ref
             gitref = ref
 
-        refs = await cache.get((git, ref), _list_remote_refs_async)
+        refs = await cache.get(
+            (git, ref, username, password),
+            _list_remote_refs_async,
+        )
         if not refs:
-            raise GetVersionError("No ref found in upstream repository.", ref=ref)
+            raise GetVersionError(
+                "No ref found in upstream repository.",
+                ref=ref,
+            )
 
         version = next(iter(refs.values())).decode()
         return RichResult(
@@ -51,9 +94,12 @@ async def get_version(name, conf, *, cache, keymanager=None):
             gitref=gitref,
         )
 
-    refs = await cache.get((git, None), _list_remote_refs_async)
+    refs = await cache.get(
+        (git, None, username, password),
+        _list_remote_refs_async,
+    )
 
-    versions = []
+    versions: List[Union[str, RichResult]] = []
     for refname, revision in refs.items():
         refname = refname.decode()
         if not refname.startswith("refs/tags/"):
@@ -62,11 +108,11 @@ async def get_version(name, conf, *, cache, keymanager=None):
             continue
 
         version = refname.removeprefix("refs/tags/")
-        revision = revision.decode()
+        revision_str = revision.decode()
         versions.append(
             RichResult(
                 version=version,
-                revision=revision,
+                revision=revision_str,
                 gitref=refname,
             )
         )
