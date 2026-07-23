@@ -2,7 +2,26 @@
 # Copyright (c) 2024 Jakub Ružička <jru@debian.org>, et al.
 
 import pytest
-pytestmark = [pytest.mark.asyncio, pytest.mark.needs_net]
+
+rpmrepo_deps_available = True
+try:
+    __import__("lxml.etree")
+    try:
+        __import__("compression.zstd")
+    except ImportError:
+        __import__("zstandard")
+except ImportError:
+    rpmrepo_deps_available = False
+
+pytestmark = [
+    pytest.mark.asyncio,
+    pytest.mark.needs_net,
+    pytest.mark.skipif(
+        not rpmrepo_deps_available,
+        reason="needs rpmrepo dependencies",
+    ),
+]
+
 
 async def test_rpmrepo_fedora(get_version):
     ver = await get_version("knot_fedora-39", {
