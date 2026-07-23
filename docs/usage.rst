@@ -930,8 +930,9 @@ arch
 This source supports :ref:`list options`.
 
 .. note::
-   An additional dependency "lxml" is required.
-   You can use ``pip install 'nvchecker[rpmrepo]'``.
+   The additional dependency ``lxml`` is required. On Python versions earlier
+   than 3.14, ``zstandard`` is required as well.
+   You can install them with ``pip install 'nvchecker[rpmrepo]'``.
 
 Check Git repository
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
